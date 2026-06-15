@@ -4,7 +4,10 @@ from typing import Any, Dict, Union
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from params import get_section
+try:
+    from src.params import get_section
+except ImportError:
+    from params import get_section
 
 
 def load_source_data(source_path: Union[Path, str]) -> pd.DataFrame:

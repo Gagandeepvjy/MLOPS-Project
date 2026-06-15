@@ -7,7 +7,10 @@ import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-from params import get_section
+try:
+    from src.params import get_section
+except ImportError:
+    from params import get_section
 
 
 def make_one_hot_encoder() -> OneHotEncoder:

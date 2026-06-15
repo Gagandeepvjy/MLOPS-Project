@@ -1,0 +1,178 @@
+schema: '2.0'
+stages:
+  ingest:
+    cmd: python -m src.data.data_ingestion
+    deps:
+    - path: params.yaml
+      hash: md5
+      md5: 5130e8d2e5b184450592ea7de4640ccb
+      size: 697
+    - path: src/data/data_ingestion.py
+      hash: md5
+      md5: d499991d7d118d9695c2c18f80295971
+      size: 1920
+    - path: src/dataset.csv
+      hash: md5
+      md5: 2f522da222a50746a28c5b61c8ec0165
+      size: 7072649
+    params:
+      params.yaml:
+        data_ingestion.random_state: 42
+        data_ingestion.test_size: 0.2
+    outs:
+    - path: data/raw/test.csv
+      hash: md5
+      md5: 8cd8fc862bf7b0b0ba4a9165f1cc1a97
+      size: 1376488
+    - path: data/raw/train.csv
+      hash: md5
+      md5: 4e0815246d96bb9492aa03e7511a2ec8
+      size: 5505981
+  preprocess:
+    cmd: python -m src.data.data_preprocessing
+    deps:
+    - path: data/raw/test.csv
+      hash: md5
+      md5: 8cd8fc862bf7b0b0ba4a9165f1cc1a97
+      size: 1376488
+    - path: data/raw/train.csv
+      hash: md5
+      md5: 4e0815246d96bb9492aa03e7511a2ec8
+      size: 5505981
+    - path: params.yaml
+      hash: md5
+      md5: 5130e8d2e5b184450592ea7de4640ccb
+      size: 697
+    - path: src/data/data_preprocessing.py
+      hash: md5
+      md5: 50f34a20a55e5c848620493679935ccd
+      size: 3617
+    params:
+      params.yaml:
+        preprocessing.interim_dir: data/interim
+        preprocessing.raw_dir: data/raw
+    outs:
+    - path: data/interim/test_preprocessed.csv
+      hash: md5
+      md5: 14436e5bb0664e5a449c72e1b01c5b79
+      size: 1283656
+    - path: data/interim/train_preprocessed.csv
+      hash: md5
+      md5: 9937d468dad1962cf247df0ff4916872
+      size: 5105799
+  featurize:
+    cmd: python -m src.features.feature_engineering
+    deps:
+    - path: data/interim/test_preprocessed.csv
+      hash: md5
+      md5: 14436e5bb0664e5a449c72e1b01c5b79
+      size: 1283656
+    - path: data/interim/train_preprocessed.csv
+      hash: md5
+      md5: 9937d468dad1962cf247df0ff4916872
+      size: 5105799
+    - path: params.yaml
+      hash: md5
+      md5: 5130e8d2e5b184450592ea7de4640ccb
+      size: 697
+    - path: src/features/feature_engineering.py
+      hash: md5
+      md5: bb7caa695f355033b50da87ce73ac3a4
+      size: 3890
+    params:
+      params.yaml:
+        feature_engineering.target_col: churn_risk_score
+    outs:
+    - path: data/processed/test_features.csv
+      hash: md5
+      md5: 3a60b3e519f6def20628917f1c99283c
+      size: 42836039
+    - path: data/processed/train_features.csv
+      hash: md5
+      md5: 7e96a3f3877ab05e1eb4d90fbe35a7fd
+      size: 171095322
+    - path: models/vectorizer.pkl
+      hash: md5
+      md5: 6c3ddba3e2cdf9e16860a236c15289dd
+      size: 44508
+  train:
+    cmd: python -m src.model.model_building
+    deps:
+    - path: data/processed/train_features.csv
+      hash: md5
+      md5: 7e96a3f3877ab05e1eb4d90fbe35a7fd
+      size: 171095322
+    - path: params.yaml
+      hash: md5
+      md5: 5130e8d2e5b184450592ea7de4640ccb
+      size: 697
+    - path: src/model/model_building.py
+      hash: md5
+      md5: b1329bcf40b30be6bd29556ae2f4806c
+      size: 2041
+    params:
+      params.yaml:
+        model.max_depth:
+        model.min_samples_leaf: 1
+        model.min_samples_split: 2
+        model.n_estimators: 100
+        model.random_state: 42
+    outs:
+    - path: models/model.pkl
+      hash: md5
+      md5: a33ccc313778e8eaeaf590e9ce817507
+      size: 91629337
+  evaluate:
+    cmd: python -m src.model.model_evaluation
+    deps:
+    - path: data/processed/test_features.csv
+      hash: md5
+      md5: 3a60b3e519f6def20628917f1c99283c
+      size: 42836039
+    - path: models/model.pkl
+      hash: md5
+      md5: a33ccc313778e8eaeaf590e9ce817507
+      size: 91629337
+    - path: params.yaml
+      hash: md5
+      md5: 5130e8d2e5b184450592ea7de4640ccb
+      size: 697
+    - path: src/model/model_building.py
+      hash: md5
+      md5: b1329bcf40b30be6bd29556ae2f4806c
+      size: 2041
+    - path: src/model/model_evaluation.py
+      hash: md5
+      md5: 3151b2efe1ef1b7b84366ab2cebef5eb
+      size: 3728
+    params:
+      params.yaml:
+        evaluation.target_col: churn_risk_score
+    outs:
+    - path: metrics/metrics.json
+      hash: md5
+      md5: 7a9d2481137db353bc370c6c2c09571f
+      size: 158
+    - path: reports/experiment.json
+      hash: md5
+      md5: 6582e88f309df4fc6dbbd854d0aa578a
+      size: 383
+    - path: reports/model_info.json
+      hash: md5
+      md5: 4ccc2a1c5c41ec6be162056448960866
+      size: 261
+  register:
+    cmd: python -m src.model.model_registration
+    deps:
+    - path: reports/experiment.json
+      hash: md5
+      md5: 6582e88f309df4fc6dbbd854d0aa578a
+      size: 383
+    - path: reports/model_info.json
+      hash: md5
+      md5: 4ccc2a1c5c41ec6be162056448960866
+      size: 261
+    - path: src/model/model_registration.py
+      hash: md5
+      md5: 3c1f87e3b477415189101629121c6124
+      size: 2594

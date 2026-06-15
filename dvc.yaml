@@ -1,0 +1,82 @@
+params:
+  - params.yaml
+
+stages:
+  ingest:
+    cmd: python -m src.data.data_ingestion
+    deps:
+      - src/data/data_ingestion.py
+      - src/dataset.csv
+      - params.yaml
+    outs:
+      - data/raw/train.csv
+      - data/raw/test.csv
+    params:
+      - data_ingestion.test_size
+      - data_ingestion.random_state
+
+  preprocess:
+    cmd: python -m src.data.data_preprocessing
+    deps:
+      - src/data/data_preprocessing.py
+      - data/raw/train.csv
+      - data/raw/test.csv
+      - params.yaml
+    outs:
+      - data/interim/train_preprocessed.csv
+      - data/interim/test_preprocessed.csv
+    params:
+      - preprocessing.raw_dir
+      - preprocessing.interim_dir
+
+  featurize:
+    cmd: python -m src.features.feature_engineering
+    deps:
+      - src/features/feature_engineering.py
+      - data/interim/train_preprocessed.csv
+      - data/interim/test_preprocessed.csv
+      - params.yaml
+    outs:
+      - data/processed/train_features.csv
+      - data/processed/test_features.csv
+      - models/vectorizer.pkl
+    params:
+      - feature_engineering.target_col
+
+  train:
+    cmd: python -m src.model.model_building
+    deps:
+      - src/model/model_building.py
+      - data/processed/train_features.csv
+      - params.yaml
+    outs:
+      - models/model.pkl
+    params:
+      - model.n_estimators
+      - model.random_state
+      - model.max_depth
+      - model.min_samples_split
+      - model.min_samples_leaf
+
+  evaluate:
+    cmd: python -m src.model.model_evaluation
+    deps:
+      - src/model/model_evaluation.py
+      - src/model/model_building.py
+      - data/processed/test_features.csv
+      - models/model.pkl
+      - params.yaml
+    outs:
+      - metrics/metrics.json
+      - reports/experiment.json
+      - reports/model_info.json
+    params:
+      - evaluation.target_col
+
+  register:
+    cmd: python -m src.model.model_registration
+    deps:
+      - src/model/model_registration.py
+      - reports/experiment.json
+      - reports/model_info.json
+    outs: []

@@ -4,7 +4,10 @@ from typing import Any, Dict, Union
 import numpy as np
 import pandas as pd
 
-from params import get_section
+try:
+    from src.params import get_section
+except ImportError:
+    from params import get_section
 
 
 def preprocess_dataframe(df: pd.DataFrame) -> pd.DataFrame:

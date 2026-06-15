@@ -5,7 +5,10 @@ import joblib
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 
-from params import get_section
+try:
+    from src.params import get_section
+except ImportError:
+    from params import get_section
 
 
 def train_model(

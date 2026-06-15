@@ -7,7 +7,10 @@ import dagshub
 import mlflow
 from dotenv import load_dotenv
 
-from params import load_params
+try:
+    from src.params import load_params
+except ImportError:
+    from params import load_params
 
 project_dir = Path(__file__).resolve().parents[2]
 env_path = project_dir / ".env"
