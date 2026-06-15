@@ -1,0 +1,8 @@
+Flask>=2.0
+python-dotenv
+mlflow
+pandas
+prometheus-client
+joblib
+scikit-learn
+pyyaml

@@ -4,7 +4,9 @@ from pathlib import Path
 from typing import Any, Dict, Union
 
 import dagshub
+import joblib
 import mlflow
+import mlflow.sklearn
 from dotenv import load_dotenv
 
 try:
@@ -50,8 +52,16 @@ def register_model(
 
     experiment_info = load_experiment_info(reports_dir)
     all_params = load_params()
-    
-    with mlflow.start_run():
+    mlflow_config = all_params.get("mlflow", {}) if isinstance(all_params, dict) else {}
+    model_name = mlflow_config.get("model_name", "churn-risk-model")
+    register_flag = mlflow_config.get("register_model", True)
+
+    model_file = proj_dir / "models" / "model.pkl"
+    if not model_file.exists():
+        raise FileNotFoundError(f"Expected model file at {model_file}. Run model building first.")
+    model = joblib.load(model_file)
+
+    with mlflow.start_run() as run:
         flat_params = {}
         for section, section_params in all_params.items():
             if isinstance(section_params, dict):
@@ -60,11 +70,15 @@ def register_model(
                         flat_params[f"{section}.{key}"] = value
             else:
                 flat_params[section] = section_params
-        
+
         mlflow.log_params(flat_params)
-        
         for metric_name, metric_value in experiment_info.get("metrics", {}).items():
             mlflow.log_metric(metric_name, metric_value)
+
+        mlflow.sklearn.log_model(model, artifact_path="model")
+        if register_flag and model_name:
+            mlflow.register_model(f"runs:/{run.info.run_id}/model", model_name)
+
         mlflow.log_artifact(str(reports_dir / "experiment.json"))
         mlflow.log_artifact(str(reports_dir / "model_info.json"))
 

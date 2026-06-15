@@ -1,6 +1,9 @@
 from pathlib import Path
 
-from logger import get_logger
+try:
+    from src.logger import get_logger
+except ImportError:
+    from logger import get_logger
 
 
 def main():

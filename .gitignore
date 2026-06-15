@@ -90,3 +90,5 @@ target/
 
 *.pkl
 models/*.pkl
+
+projectflow.txt

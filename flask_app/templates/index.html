@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Churn Prediction App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="container py-4">
+      <h1 class="mb-4">Churn Prediction App</h1>
+
+      <form method="post" action="{{ url_for('predict') }}">
+        <div class="row g-3">
+          <div class="col-md-2">
+            <label for="age" class="form-label">Age</label>
+            <input type="number" class="form-control" id="age" name="age" value="{{ form_data.get('age', '') }}" required>
+          </div>
+          <div class="col-md-2">
+            <label for="gender" class="form-label">Gender</label>
+            <input type="text" class="form-control" id="gender" name="gender" value="{{ form_data.get('gender', '') }}" required>
+          </div>
+          <div class="col-md-4">
+            <label for="region_category" class="form-label">Region Category</label>
+            <input type="text" class="form-control" id="region_category" name="region_category" value="{{ form_data.get('region_category', '') }}" required>
+          </div>
+          <div class="col-md-4">
+            <label for="membership_category" class="form-label">Membership Category</label>
+            <input type="text" class="form-control" id="membership_category" name="membership_category" value="{{ form_data.get('membership_category', '') }}" required>
+          </div>
+        </div>
+
+        <div class="row g-3 mt-3">
+          <div class="col-md-4">
+            <label for="joining_date" class="form-label">Joining Date</label>
+            <input type="date" class="form-control" id="joining_date" name="joining_date" value="{{ form_data.get('joining_date', '') }}">
+          </div>
+          <div class="col-md-4">
+            <label for="joined_through_referral" class="form-label">Joined Through Referral</label>
+            <input type="text" class="form-control" id="joined_through_referral" name="joined_through_referral" value="{{ form_data.get('joined_through_referral', '') }}">
+          </div>
+          <div class="col-md-4">
+            <label for="preferred_offer_types" class="form-label">Preferred Offer Types</label>
+            <input type="text" class="form-control" id="preferred_offer_types" name="preferred_offer_types" value="{{ form_data.get('preferred_offer_types', '') }}">
+          </div>
+        </div>
+
+        <div class="row g-3 mt-3">
+          <div class="col-md-4">
+            <label for="medium_of_operation" class="form-label">Medium Of Operation</label>
+            <input type="text" class="form-control" id="medium_of_operation" name="medium_of_operation" value="{{ form_data.get('medium_of_operation', '') }}">
+          </div>
+          <div class="col-md-4">
+            <label for="internet_option" class="form-label">Internet Option</label>
+            <input type="text" class="form-control" id="internet_option" name="internet_option" value="{{ form_data.get('internet_option', '') }}">
+          </div>
+          <div class="col-md-4">
+            <label for="last_visit_time" class="form-label">Last Visit Time</label>
+            <input type="time" class="form-control" id="last_visit_time" name="last_visit_time" value="{{ form_data.get('last_visit_time', '') }}">
+          </div>
+        </div>
+
+        <div class="row g-3 mt-3">
+          <div class="col-md-3">
+            <label for="days_since_last_login" class="form-label">Days Since Last Login</label>
+            <input type="number" class="form-control" id="days_since_last_login" name="days_since_last_login" value="{{ form_data.get('days_since_last_login', '') }}">
+          </div>
+          <div class="col-md-3">
+            <label for="avg_time_spent" class="form-label">Avg Time Spent</label>
+            <input type="number" step="any" class="form-control" id="avg_time_spent" name="avg_time_spent" value="{{ form_data.get('avg_time_spent', '') }}">
+          </div>
+          <div class="col-md-3">
+            <label for="avg_transaction_value" class="form-label">Avg Transaction Value</label>
+            <input type="number" step="any" class="form-control" id="avg_transaction_value" name="avg_transaction_value" value="{{ form_data.get('avg_transaction_value', '') }}">
+          </div>
+          <div class="col-md-3">
+            <label for="avg_frequency_login_days" class="form-label">Avg Frequency Login Days</label>
+            <input type="number" step="any" class="form-control" id="avg_frequency_login_days" name="avg_frequency_login_days" value="{{ form_data.get('avg_frequency_login_days', '') }}">
+          </div>
+        </div>
+
+        <div class="row g-3 mt-3">
+          <div class="col-md-3">
+            <label for="points_in_wallet" class="form-label">Points In Wallet</label>
+            <input type="number" step="any" class="form-control" id="points_in_wallet" name="points_in_wallet" value="{{ form_data.get('points_in_wallet', '') }}">
+          </div>
+          <div class="col-md-3">
+            <label for="used_special_discount" class="form-label">Used Special Discount</label>
+            <input type="text" class="form-control" id="used_special_discount" name="used_special_discount" value="{{ form_data.get('used_special_discount', '') }}">
+          </div>
+          <div class="col-md-3">
+            <label for="offer_application_preference" class="form-label">Offer Application Preference</label>
+            <input type="text" class="form-control" id="offer_application_preference" name="offer_application_preference" value="{{ form_data.get('offer_application_preference', '') }}">
+          </div>
+          <div class="col-md-3">
+            <label for="past_complaint" class="form-label">Past Complaint</label>
+            <input type="text" class="form-control" id="past_complaint" name="past_complaint" value="{{ form_data.get('past_complaint', '') }}">
+          </div>
+        </div>
+
+        <div class="row g-3 mt-3">
+          <div class="col-md-4">
+            <label for="complaint_status" class="form-label">Complaint Status</label>
+            <input type="text" class="form-control" id="complaint_status" name="complaint_status" value="{{ form_data.get('complaint_status', '') }}">
+          </div>
+          <div class="col-md-8">
+            <label for="feedback" class="form-label">Feedback</label>
+            <input type="text" class="form-control" id="feedback" name="feedback" value="{{ form_data.get('feedback', '') }}">
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <button type="submit" class="btn btn-primary">Predict</button>
+          <a href="/metrics" class="btn btn-secondary ms-2">Prometheus Metrics</a>
+        </div>
+      </form>
+
+      {% if result is not none %}
+        <div class="alert alert-info mt-4">
+          <h5>Prediction result</h5>
+          <p>{{ result }}</p>
+          {% if probability is not none %}
+            <p>Probability: {{ probability | round(4) }}</p>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </body>
+</html>

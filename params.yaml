@@ -32,3 +32,5 @@ evaluation:
 mlflow:
   log_params: true
   log_artifacts: true
+  model_name: churn-risk-model
+  register_model: true
