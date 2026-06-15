@@ -58,7 +58,6 @@ target/
 
 # DotEnv configuration
 .env
-mlruns/
 
 # Database
 *.db
@@ -93,4 +92,4 @@ mlruns/
 models/*.pkl
 
 projectflow.txt
-mlflow.txtmlruns/
+mlflow.txt
