@@ -93,4 +93,4 @@ mlruns/
 models/*.pkl
 
 projectflow.txt
-mlflow.txt
+mlflow.txtmlruns/
