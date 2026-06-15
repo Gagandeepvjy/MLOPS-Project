@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from pathlib import Path
 from typing import Any, Dict, Union
@@ -8,6 +9,8 @@ import joblib
 import mlflow
 import mlflow.sklearn
 from dotenv import load_dotenv
+
+logger = logging.getLogger(__name__)
 
 try:
     from src.params import load_params
@@ -44,11 +47,29 @@ def register_model(
     dagshub_repo_owner = dagshub_repo_owner or os.getenv("DAGSHUB_REPO_OWNER")
     dagshub_repo_name = dagshub_repo_name or os.getenv("DAGSHUB_REPO_NAME")
 
+    local_mlflow_dir = proj_dir / "mlruns"
+    use_local_mlflow = False
+
     if mlflow_tracking_uri:
         mlflow.set_tracking_uri(mlflow_tracking_uri)
-
-    if dagshub_repo_owner and dagshub_repo_name:
-        dagshub.init(repo_owner=dagshub_repo_owner, repo_name=dagshub_repo_name, mlflow=True)
+        logger.info("Using MLflow tracking URI %s", mlflow_tracking_uri)
+    else:
+        if dagshub_repo_owner and dagshub_repo_name:
+            try:
+                dagshub.init(repo_owner=dagshub_repo_owner, repo_name=dagshub_repo_name, mlflow=True)
+                logger.info("Initialized DagsHub logging for %s/%s", dagshub_repo_owner, dagshub_repo_name)
+            except Exception as exc:
+                logger.warning(
+                    "DagsHub initialization failed (%s); defaulting to local MLflow run store at %s",
+                    exc,
+                    local_mlflow_dir,
+                )
+                mlflow.set_tracking_uri(f"file:{local_mlflow_dir}")
+                use_local_mlflow = True
+        else:
+            mlflow.set_tracking_uri(f"file:{local_mlflow_dir}")
+            use_local_mlflow = True
+            logger.info("No remote MLflow configured; using local MLflow run store at %s", local_mlflow_dir)
 
     experiment_info = load_experiment_info(reports_dir)
     all_params = load_params()
@@ -76,8 +97,18 @@ def register_model(
             mlflow.log_metric(metric_name, metric_value)
 
         mlflow.sklearn.log_model(model, artifact_path="model")
-        if register_flag and model_name:
-            mlflow.register_model(f"runs:/{run.info.run_id}/model", model_name)
+        if register_flag and model_name and not use_local_mlflow:
+            try:
+                mlflow.register_model(f"runs:/{run.info.run_id}/model", model_name)
+                logger.info("Registered model %s in MLflow model registry", model_name)
+            except Exception as exc:
+                logger.warning(
+                    "Model registry registration failed (%s); continuing without registry registration.",
+                    exc,
+                )
+        elif register_flag and model_name and use_local_mlflow:
+            logger.info(
+                "Skipping model registry registration because local MLflow tracking is in use.")
 
         mlflow.log_artifact(str(reports_dir / "experiment.json"))
         mlflow.log_artifact(str(reports_dir / "model_info.json"))
