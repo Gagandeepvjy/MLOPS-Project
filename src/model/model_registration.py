@@ -48,7 +48,12 @@ def register_model(
         mlflow.set_tracking_uri(mlflow_tracking_uri)
 
     if dagshub_repo_owner and dagshub_repo_name:
-        dagshub.init(repo_owner=dagshub_repo_owner, repo_name=dagshub_repo_name, mlflow=True)
+        dagshub.init(
+        repo_owner=dagshub_repo_owner,
+        repo_name=dagshub_repo_name,
+        mlflow=True,
+        dvc=False  # add this to avoid DVC remote conflict
+        )
 
     experiment_info = load_experiment_info(reports_dir)
     all_params = load_params()
