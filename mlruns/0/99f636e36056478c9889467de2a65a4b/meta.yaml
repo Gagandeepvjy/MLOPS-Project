@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/gagandeepvijayaraghavan/MLOPS/MLOPS-Project/mlops-project/mlruns/0/99f636e36056478c9889467de2a65a4b/artifacts
+end_time: 1781563146001
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 99f636e36056478c9889467de2a65a4b
+run_name: nimble-stag-808
+run_uuid: 99f636e36056478c9889467de2a65a4b
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1781563144346
+status: 3
+tags: []
+user_id: gagandeepvijayaraghavan
