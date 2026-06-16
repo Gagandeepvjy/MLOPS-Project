@@ -44,16 +44,27 @@ def register_model(
     dagshub_repo_owner = dagshub_repo_owner or os.getenv("DAGSHUB_REPO_OWNER")
     dagshub_repo_name = dagshub_repo_name or os.getenv("DAGSHUB_REPO_NAME")
 
-    if mlflow_tracking_uri:
-        mlflow.set_tracking_uri(mlflow_tracking_uri)
+    # if mlflow_tracking_uri:
+    #     mlflow.set_tracking_uri(mlflow_tracking_uri)
 
-    if dagshub_repo_owner and dagshub_repo_name:
-        dagshub.init(
-        repo_owner=dagshub_repo_owner,
-        repo_name=dagshub_repo_name,
-        mlflow=True,
-        dvc=False  # add this to avoid DVC remote conflict
-        )
+    # if dagshub_repo_owner and dagshub_repo_name:
+    #     dagshub.init(
+    #     repo_owner=dagshub_repo_owner,
+    #     repo_name=dagshub_repo_name,
+    #     mlflow=True,
+    #     dvc=False  # add this to avoid DVC remote conflict
+    #     )
+    # Auth setup — add this before mlflow.start_run()
+    dagshub_token = os.getenv("DAGSHUB_USER_TOKEN")
+    if not dagshub_token:
+        raise EnvironmentError("DAGSHUB_USER_TOKEN environment variable is not set")
+
+    os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+    os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+
+    mlflow.set_tracking_uri(f"https://dagshub.com/{dagshub_repo_owner}/{dagshub_repo_name}.mlflow")
+
+    # Remove dagshub.init() entirely
 
     experiment_info = load_experiment_info(reports_dir)
     all_params = load_params()
