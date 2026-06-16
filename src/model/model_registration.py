@@ -2,8 +2,6 @@ import json
 import os
 from pathlib import Path
 from typing import Any, Dict, Union
-
-import dagshub
 import joblib
 import mlflow
 import mlflow.sklearn
@@ -40,21 +38,11 @@ def register_model(
 ):
     proj_dir = Path(__file__).resolve().parents[2]
     reports_dir = Path(reports_dir) if reports_dir else proj_dir / "reports"
-    mlflow_tracking_uri = mlflow_tracking_uri or os.getenv("MLFLOW_TRACKING_URI")
+
     dagshub_repo_owner = dagshub_repo_owner or os.getenv("DAGSHUB_REPO_OWNER")
     dagshub_repo_name = dagshub_repo_name or os.getenv("DAGSHUB_REPO_NAME")
 
-    # if mlflow_tracking_uri:
-    #     mlflow.set_tracking_uri(mlflow_tracking_uri)
-
-    # if dagshub_repo_owner and dagshub_repo_name:
-    #     dagshub.init(
-    #     repo_owner=dagshub_repo_owner,
-    #     repo_name=dagshub_repo_name,
-    #     mlflow=True,
-    #     dvc=False  # add this to avoid DVC remote conflict
-    #     )
-    # Auth setup — add this before mlflow.start_run()
+    # Auth setup
     dagshub_token = os.getenv("DAGSHUB_USER_TOKEN")
     if not dagshub_token:
         raise EnvironmentError("DAGSHUB_USER_TOKEN environment variable is not set")
@@ -63,8 +51,6 @@ def register_model(
     os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
 
     mlflow.set_tracking_uri(f"https://dagshub.com/{dagshub_repo_owner}/{dagshub_repo_name}.mlflow")
-
-    # Remove dagshub.init() entirely
 
     experiment_info = load_experiment_info(reports_dir)
     all_params = load_params()
@@ -75,6 +61,7 @@ def register_model(
     model_file = proj_dir / "models" / "model.pkl"
     if not model_file.exists():
         raise FileNotFoundError(f"Expected model file at {model_file}. Run model building first.")
+
     model = joblib.load(model_file)
 
     with mlflow.start_run() as run:
@@ -88,15 +75,15 @@ def register_model(
                 flat_params[section] = section_params
 
         mlflow.log_params(flat_params)
+
         for metric_name, metric_value in experiment_info.get("metrics", {}).items():
             mlflow.log_metric(metric_name, metric_value)
 
-        # mlflow.sklearn.log_model(model, artifact_path="model")
-        # if register_flag and model_name:
-        #     mlflow.register_model(f"runs:/{run.info.run_id}/model", model_name)
-        mlflow.sklearn.log_model(model, name="model", artifact_path="model")
-        if register_flag and model_name:
-            registered = mlflow.register_model(f"runs:/{run.info.run_id}/model", model_name)
+        mlflow.sklearn.log_model(
+            model,
+            name="model",
+            registered_model_name=model_name if register_flag else None
+        )
 
         mlflow.log_artifact(str(reports_dir / "experiment.json"))
         mlflow.log_artifact(str(reports_dir / "model_info.json"))
