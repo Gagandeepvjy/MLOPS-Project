@@ -91,9 +91,12 @@ def register_model(
         for metric_name, metric_value in experiment_info.get("metrics", {}).items():
             mlflow.log_metric(metric_name, metric_value)
 
-        mlflow.sklearn.log_model(model, artifact_path="model")
+        # mlflow.sklearn.log_model(model, artifact_path="model")
+        # if register_flag and model_name:
+        #     mlflow.register_model(f"runs:/{run.info.run_id}/model", model_name)
+        mlflow.sklearn.log_model(model, name="model", artifact_path="model")
         if register_flag and model_name:
-            mlflow.register_model(f"runs:/{run.info.run_id}/model", model_name)
+            registered = mlflow.register_model(f"runs:/{run.info.run_id}/model", model_name)
 
         mlflow.log_artifact(str(reports_dir / "experiment.json"))
         mlflow.log_artifact(str(reports_dir / "model_info.json"))
