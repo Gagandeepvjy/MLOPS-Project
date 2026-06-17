@@ -56,8 +56,8 @@ def register_model(
 
 
     #Below is for local testing without DagsHub
-    mlflow.set_tracking_uri('https://dagshub.com/Gagandeepvjy/MLOPS-Project.mlflow')
-    dagshub.init(repo_owner="Gagandeepvjy", repo_name="MLOPS-Project", mlflow=True)
+    # mlflow.set_tracking_uri('https://dagshub.com/Gagandeepvjy/MLOPS-Project.mlflow')
+    # dagshub.init(repo_owner="Gagandeepvjy", repo_name="MLOPS-Project", mlflow=True)
 
     experiment_info = load_experiment_info(reports_dir)
     all_params = load_params()
