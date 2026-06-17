@@ -4,5 +4,5 @@ mlflow
 pandas
 prometheus-client
 joblib
-scikit-learn
+scikit-learn==1.5.1
 pyyaml

@@ -9,7 +9,7 @@ mlflow
 pandas
 numpy
 joblib
-scikit-learn
+scikit-learn==1.5.1
 prometheus-client
 Flask>=2.0
 PyYAML
