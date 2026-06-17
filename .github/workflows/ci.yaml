@@ -63,3 +63,21 @@ jobs:
         uses: azure/setup-kubectl@v3
         with:
           version: 'latest'
+
+      - name: Set Up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+      
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --region eu-north-1 --name flask-app-cluster
+
+      - name: Create Kubernetes Secret
+        run: |
+          kubectl create secret generic dagshub_user_token \
+            --from-literal=DAGSHUB_USER_TOKEN=${{ secrets.DAGSHUB_USER_TOKEN}} --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy to EKS
+        run: |
+          kubectl apply -f deployment.yaml

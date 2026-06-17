@@ -16,5 +16,5 @@ COPY src/dataset.csv ./src/dataset.csv
 EXPOSE 5002
 WORKDIR /app/flask_app
 
-# CMD ["gunicorn", "--bind", "0.0.0.0:5002", "app:app", "--timeout", "120"]
-CMD ["python", "app.py"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5002", "app:app", "--timeout", "120"]
+# CMD ["python", "app.py"]
