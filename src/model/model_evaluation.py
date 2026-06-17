@@ -1,9 +1,13 @@
 import json
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Union
 
+import dagshub
 import joblib
+import mlflow
+import mlflow.sklearn
 import pandas as pd
 from sklearn.metrics import accuracy_score, precision_score, recall_score, roc_auc_score
 
@@ -93,9 +97,58 @@ def evaluate_model(
 
 
 if __name__ == "__main__":
+    # ---------- production use ----------
+    # Set up DagsHub credentials for MLflow tracking
+    # dagshub_token = os.getenv("CAPSTONE_TEST")
+    # if dagshub_token:
+    #     # os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+    #     # os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+    #     # dagshub_url = "https://dagshub.com"
+    #     # dagshub_repo_owner = dagshub_repo_owner or os.getenv("DAGSHUB_REPO_OWNER")
+    #     # dagshub_repo_name = dagshub_repo_name or os.getenv("DAGSHUB_REPO_NAME")
+    #     # mlflow.set_tracking_uri(f"{dagshub_url}/{dagshub_repo_owner}/{dagshub_repo_name}.mlflow")
+    #     # dagshub.init(repo_owner=dagshub_repo_owner, repo_name=dagshub_repo_name, mlflow=True)
+    #     dagshub_repo_owner = dagshub_repo_owner or os.getenv("DAGSHUB_REPO_OWNER")
+    #     dagshub_repo_name = dagshub_repo_name or os.getenv("DAGSHUB_REPO_NAME")
+
+    # # Auth setup
+    #     dagshub_token = os.getenv("DAGSHUB_USER_TOKEN")
+    #     if not dagshub_token:
+    #         raise EnvironmentError("DAGSHUB_USER_TOKEN environment variable is not set")
+
+    #     os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+    #     os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+
+    #     mlflow.set_tracking_uri(f"https://dagshub.com/{dagshub_repo_owner}/{dagshub_repo_name}.mlflow")
+
+
+    # -------------------------------------
+    
+    # ---------- local use ----------
+    # If you don't want to use DagsHub/MLflow tracking locally,
+    # just skip setting the environment variable and the script
+    # will still write reports to the local reports/ directory.
+    # -------------------------------------
+
     model = load_model()
     test_df = load_test_data()
     metrics_file, experiment_file, model_info_file = evaluate_model(model, test_df)
+
+    with mlflow.start_run() as run:
+        # Log metrics and artifacts to MLflow if tracking is configured.
+        try:
+            if mlflow.get_tracking_uri():
+                metrics = json.loads(metrics_file.open().read())
+                for metric_name, metric_value in metrics.items():
+                    mlflow.log_metric(metric_name, metric_value)
+                mlflow.sklearn.log_model(model, "model")
+                mlflow.log_artifact(str(metrics_file))
+                mlflow.log_artifact(str(experiment_file))
+                mlflow.log_artifact(str(model_info_file))
+                print(f"Logged metrics and artifacts to MLflow run {run.info.run_id}")
+        except Exception as exc:
+            print(f"MLflow logging skipped or failed: {exc}")
+
     print(f"Wrote metrics to {metrics_file}")
     print(f"Wrote experiment data to {experiment_file}")
     print(f"Wrote model info to {model_info_file}")

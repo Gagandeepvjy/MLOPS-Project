@@ -1,5 +1,4 @@
 import os
-import sys
 import time
 import warnings
 from pathlib import Path
@@ -12,12 +11,6 @@ from flask import Flask, render_template, request
 from prometheus_client import CollectorRegistry, Counter, CONTENT_TYPE_LATEST, Histogram, generate_latest
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT_DIR))
-
-try:
-    from src.data.data_preprocessing import preprocess_dataframe
-except ImportError:
-    from data.data_preprocessing import preprocess_dataframe
 
 warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore")
@@ -132,11 +125,58 @@ def build_input_dataframe(form_data):
     return df
 
 
+def _load_select_options():
+    select_options = {}
+    try:
+        sample_path = ROOT_DIR / "src" / "dataset.csv"
+        if sample_path.exists():
+            sample_df = pd.read_csv(sample_path)
+            for col in RAW_FEATURES:
+                if col in sample_df.columns:
+                    uniques = sample_df[col].dropna().unique().tolist()
+                    if 1 < len(uniques) <= 200:
+                        select_options[col] = sorted(map(str, uniques))
+    except Exception:
+        return {}
+    return select_options
+
+
 def build_prediction_features(raw_df):
-    preprocessed = preprocess_dataframe(raw_df)
-    if "churn_risk_score" in preprocessed.columns:
-        preprocessed = preprocessed.drop(columns=["churn_risk_score"])
-    return preprocessed
+    df = raw_df.copy()
+    df.replace({"?": pd.NA, "xxxxxxx": pd.NA, "xxxxxxxx": pd.NA}, inplace=True)
+    df.drop(columns=["security_no", "referral_id"], errors="ignore", inplace=True)
+
+    if "joining_date" in df.columns:
+        df["joining_date"] = pd.to_datetime(df["joining_date"], errors="coerce")
+        df["joining_year"] = df["joining_date"].dt.year
+        df["joining_month"] = df["joining_date"].dt.month
+        df["joining_day"] = df["joining_date"].dt.day
+        df.drop(columns=["joining_date"], inplace=True)
+
+    if "last_visit_time" in df.columns:
+        time_series = pd.to_datetime(df["last_visit_time"], format="%H:%M:%S", errors="coerce")
+        df["last_visit_seconds"] = (
+            time_series.dt.hour.fillna(0).astype(int) * 3600
+            + time_series.dt.minute.fillna(0).astype(int) * 60
+            + time_series.dt.second.fillna(0).astype(int)
+        )
+        df.drop(columns=["last_visit_time"], inplace=True)
+
+    numeric_cols = df.select_dtypes(include=["number"]).columns.tolist()
+    categorical_cols = df.select_dtypes(include=["object", "category"]).columns.tolist()
+
+    for col in numeric_cols:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+        median_value = df[col].median()
+        df[col] = df[col].fillna(median_value)
+
+    for col in categorical_cols:
+        df[col] = df[col].astype("string").fillna("Unknown")
+
+    if "churn_risk_score" in df.columns:
+        df = df.drop(columns=["churn_risk_score"])
+
+    return df
 
 
 model, vectorizer = load_model_and_vectorizer()
@@ -146,27 +186,12 @@ model, vectorizer = load_model_and_vectorizer()
 def home():
     REQUEST_COUNT.labels(method="GET", endpoint="/").inc()
     start_time = time.time()
-    # Attempt to build select options for categorical fields from a sample dataset.
-    select_options = {}
-    try:
-        sample_path = ROOT_DIR / "src" / "dataset.csv"
-        if sample_path.exists():
-            sample_df = pd.read_csv(sample_path)
-            for col in RAW_FEATURES:
-                if col in sample_df.columns:
-                    uniques = sample_df[col].dropna().unique().tolist()
-                    # Only offer a dropdown for columns with a reasonable number of categories
-                    if 1 < len(uniques) <= 200:
-                        select_options[col] = sorted(map(str, uniques))
-    except Exception:
-        select_options = {}
-
     response = render_template(
         "index.html",
         result=None,
         probability=None,
         form_data={},
-        select_options=select_options,
+        select_options=_load_select_options(),
     )
     REQUEST_LATENCY.labels(endpoint="/").observe(time.time() - start_time)
     return response
@@ -226,14 +251,7 @@ def predict():
         result=result_text,
         probability=probability,
         form_data=request.form,
-        select_options=(lambda: (
-            (lambda s: s)(
-                (lambda: (lambda p: ({
-                    col: sorted(map(str, pd.read_csv(p)[col].dropna().unique().tolist()))
-                    for col in RAW_FEATURES if col in pd.read_csv(p).columns and 1 < len(pd.read_csv(p)[col].dropna().unique().tolist()) <= 200
-                } if p.exists() else {}))(ROOT_DIR / "src" / "dataset.csv")
-            ))()
-        ))(),
+        select_options=_load_select_options(),
     )
 
 

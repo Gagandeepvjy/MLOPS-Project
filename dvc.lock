@@ -143,8 +143,8 @@ stages:
       size: 2041
     - path: src/model/model_evaluation.py
       hash: md5
-      md5: 3151b2efe1ef1b7b84366ab2cebef5eb
-      size: 3728
+      md5: d92fcc43d2e66b12b250208167c1a207
+      size: 6215
     params:
       params.yaml:
         evaluation.target_col: churn_risk_score
@@ -155,24 +155,24 @@ stages:
       size: 158
     - path: reports/experiment.json
       hash: md5
-      md5: 7b8be71a0a174d508af908c8bda02b69
+      md5: 9bfc07c38c2b5a3acd281ed69b992abd
       size: 383
     - path: reports/model_info.json
       hash: md5
-      md5: b6945dc1c7824398148db8ff84e41228
+      md5: 765b8ad5b4fc9e31de81b3d1e8af4cb5
       size: 261
   register:
     cmd: python -m src.model.model_registration
     deps:
     - path: reports/experiment.json
       hash: md5
-      md5: 7b8be71a0a174d508af908c8bda02b69
+      md5: 9bfc07c38c2b5a3acd281ed69b992abd
       size: 383
     - path: reports/model_info.json
       hash: md5
-      md5: b6945dc1c7824398148db8ff84e41228
+      md5: 765b8ad5b4fc9e31de81b3d1e8af4cb5
       size: 261
     - path: src/model/model_registration.py
       hash: md5
-      md5: e793a9fa7d5e158df3e1e6dcd9892684
-      size: 3307
+      md5: a97b591ab616c057f63a373a6ac96290
+      size: 3579

@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/gagandeepvijayaraghavan/MLOPS/MLOPS-Project/mlops-project/mlruns/0/8f1da4bec2d5408a9bef377c6f5ea45a/artifacts
+end_time: 1781705484893
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 8f1da4bec2d5408a9bef377c6f5ea45a
+run_name: glamorous-fox-995
+run_uuid: 8f1da4bec2d5408a9bef377c6f5ea45a
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1781705483336
+status: 3
+tags: []
+user_id: gagandeepvijayaraghavan
