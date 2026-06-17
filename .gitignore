@@ -93,3 +93,4 @@ models/*.pkl
 
 projectflow.txt
 mlflow.txt
+Dockerfile

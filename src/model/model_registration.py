@@ -81,8 +81,8 @@ def register_model(
 
         mlflow.sklearn.log_model(
             model,
-            name="model",
-            registered_model_name=model_name if register_flag else None
+            artifact_path="model",
+            registered_model_name=model_name if register_flag else None,
         )
 
         mlflow.log_artifact(str(reports_dir / "experiment.json"))
