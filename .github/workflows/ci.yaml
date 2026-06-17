@@ -75,8 +75,8 @@ jobs:
 
       - name: Create Kubernetes Secret
         run: |
-          kubectl create secret generic dagshub_user_token \
-            --from-literal=DAGSHUB_USER_TOKEN=${{ secrets.DAGSHUB_USER_TOKEN}} --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create secret generic dagshub-user-token \
+            --from-literal=DAGSHUB_USER_TOKEN=${{ secrets.DAGSHUB_USER_TOKEN }} --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Deploy to EKS
         run: |
