@@ -120,8 +120,8 @@ if __name__ == "__main__":
     # If you don't want to use DagsHub/MLflow tracking locally,
     # just skip setting the environment variable and the script
     # will still write reports to the local reports/ directory.
-    # mlflow.set_tracking_uri('https://dagshub.com/Gagandeepvjy/MLOPS-Project.mlflow')
-    # dagshub.init(repo_owner="Gagandeepvjy", repo_name="MLOPS-Project", mlflow=True)
+    mlflow.set_tracking_uri('https://dagshub.com/Gagandeepvjy/MLOPS-Project.mlflow')
+    dagshub.init(repo_owner="Gagandeepvjy", repo_name="MLOPS-Project", mlflow=True)
     # -------------------------------------
 
     model = load_model()
