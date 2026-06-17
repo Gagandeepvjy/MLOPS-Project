@@ -99,27 +99,29 @@ def evaluate_model(
 if __name__ == "__main__":
     # ---------- production use ----------
     # Set up DagsHub credentials for MLflow tracking
-    dagshub_token = os.getenv("CAPSTONE_TEST")
-    if dagshub_token:
-        # os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
-        # os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
-        # dagshub_url = "https://dagshub.com"
-        # dagshub_repo_owner = dagshub_repo_owner or os.getenv("DAGSHUB_REPO_OWNER")
-        # dagshub_repo_name = dagshub_repo_name or os.getenv("DAGSHUB_REPO_NAME")
-        # mlflow.set_tracking_uri(f"{dagshub_url}/{dagshub_repo_owner}/{dagshub_repo_name}.mlflow")
-        # dagshub.init(repo_owner=dagshub_repo_owner, repo_name=dagshub_repo_name, mlflow=True)
-        dagshub_repo_owner = dagshub_repo_owner or os.getenv("DAGSHUB_REPO_OWNER")
-        dagshub_repo_name = dagshub_repo_name or os.getenv("DAGSHUB_REPO_NAME")
+    # dagshub_token = os.getenv("DAGSHUB_USER_TOKEN")
+    # if dagshub_token:
+    #     # os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+    #     # os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+    #     # dagshub_url = "https://dagshub.com"
+    #     # dagshub_repo_owner = dagshub_repo_owner or os.getenv("DAGSHUB_REPO_OWNER")
+    #     # dagshub_repo_name = dagshub_repo_name or os.getenv("DAGSHUB_REPO_NAME")
+    #     # mlflow.set_tracking_uri(f"{dagshub_url}/{dagshub_repo_owner}/{dagshub_repo_name}.mlflow")
+    #     # dagshub.init(repo_owner=dagshub_repo_owner, repo_name=dagshub_repo_name, mlflow=True)
+    #     dagshub_repo_owner = dagshub_repo_owner or os.getenv("DAGSHUB_REPO_OWNER")
+    #     dagshub_repo_name = dagshub_repo_name or os.getenv("DAGSHUB_REPO_NAME")
 
     # Auth setup
-        dagshub_token = os.getenv("DAGSHUB_USER_TOKEN")
-        if not dagshub_token:
+    dagshub_token = os.getenv("DAGSHUB_USER_TOKEN")
+
+    if not dagshub_token:
             raise EnvironmentError("DAGSHUB_USER_TOKEN environment variable is not set")
+    os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
 
-        os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
-        os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+    os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
 
-        mlflow.set_tracking_uri(f"https://dagshub.com/{dagshub_repo_owner}/{dagshub_repo_name}.mlflow")
+    
+    mlflow.set_tracking_uri(f"https://dagshub.com/{dagshub_repo_owner}/{dagshub_repo_name}.mlflow")
 
 
     # -------------------------------------
