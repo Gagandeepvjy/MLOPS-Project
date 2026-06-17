@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: flask-app
-        image: 020866158197.dkr.ecr.eu-north-1.amazonaws.com/flask-app:latest
+        image: 930069301492.dkr.ecr.eu-north-1.amazonaws.com/mlops-project:latest
         ports:
         - containerPort: 5000
         resources:
