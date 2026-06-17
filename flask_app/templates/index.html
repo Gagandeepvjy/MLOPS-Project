@@ -18,15 +18,42 @@
           </div>
           <div class="col-md-2">
             <label for="gender" class="form-label">Gender</label>
-            <input type="text" class="form-control" id="gender" name="gender" value="{{ form_data.get('gender', '') }}" required>
+            {% if select_options and select_options.get('gender') %}
+              <select class="form-select" id="gender" name="gender" required>
+                <option value="">--</option>
+                {% for opt in select_options['gender'] %}
+                  <option value="{{ opt }}" {% if form_data.get('gender','')==opt %}selected{% endif %}>{{ opt }}</option>
+                {% endfor %}
+              </select>
+            {% else %}
+              <input type="text" class="form-control" id="gender" name="gender" value="{{ form_data.get('gender', '') }}" required>
+            {% endif %}
           </div>
           <div class="col-md-4">
             <label for="region_category" class="form-label">Region Category</label>
-            <input type="text" class="form-control" id="region_category" name="region_category" value="{{ form_data.get('region_category', '') }}" required>
+            {% if select_options and select_options.get('region_category') %}
+              <select class="form-select" id="region_category" name="region_category" required>
+                <option value="">--</option>
+                {% for opt in select_options['region_category'] %}
+                  <option value="{{ opt }}" {% if form_data.get('region_category','')==opt %}selected{% endif %}>{{ opt }}</option>
+                {% endfor %}
+              </select>
+            {% else %}
+              <input type="text" class="form-control" id="region_category" name="region_category" value="{{ form_data.get('region_category', '') }}" required>
+            {% endif %}
           </div>
           <div class="col-md-4">
             <label for="membership_category" class="form-label">Membership Category</label>
-            <input type="text" class="form-control" id="membership_category" name="membership_category" value="{{ form_data.get('membership_category', '') }}" required>
+            {% if select_options and select_options.get('membership_category') %}
+              <select class="form-select" id="membership_category" name="membership_category" required>
+                <option value="">--</option>
+                {% for opt in select_options['membership_category'] %}
+                  <option value="{{ opt }}" {% if form_data.get('membership_category','')==opt %}selected{% endif %}>{{ opt }}</option>
+                {% endfor %}
+              </select>
+            {% else %}
+              <input type="text" class="form-control" id="membership_category" name="membership_category" value="{{ form_data.get('membership_category', '') }}" required>
+            {% endif %}
           </div>
         </div>
 
@@ -37,22 +64,58 @@
           </div>
           <div class="col-md-4">
             <label for="joined_through_referral" class="form-label">Joined Through Referral</label>
-            <input type="text" class="form-control" id="joined_through_referral" name="joined_through_referral" value="{{ form_data.get('joined_through_referral', '') }}">
+            {% if select_options and select_options.get('joined_through_referral') %}
+              <select class="form-select" id="joined_through_referral" name="joined_through_referral">
+                <option value="">--</option>
+                {% for opt in select_options['joined_through_referral'] %}
+                  <option value="{{ opt }}" {% if form_data.get('joined_through_referral','')==opt %}selected{% endif %}>{{ opt }}</option>
+                {% endfor %}
+              </select>
+            {% else %}
+              <input type="text" class="form-control" id="joined_through_referral" name="joined_through_referral" value="{{ form_data.get('joined_through_referral', '') }}">
+            {% endif %}
           </div>
           <div class="col-md-4">
             <label for="preferred_offer_types" class="form-label">Preferred Offer Types</label>
-            <input type="text" class="form-control" id="preferred_offer_types" name="preferred_offer_types" value="{{ form_data.get('preferred_offer_types', '') }}">
+            {% if select_options and select_options.get('preferred_offer_types') %}
+              <select class="form-select" id="preferred_offer_types" name="preferred_offer_types">
+                <option value="">--</option>
+                {% for opt in select_options['preferred_offer_types'] %}
+                  <option value="{{ opt }}" {% if form_data.get('preferred_offer_types','')==opt %}selected{% endif %}>{{ opt }}</option>
+                {% endfor %}
+              </select>
+            {% else %}
+              <input type="text" class="form-control" id="preferred_offer_types" name="preferred_offer_types" value="{{ form_data.get('preferred_offer_types', '') }}">
+            {% endif %}
           </div>
         </div>
 
         <div class="row g-3 mt-3">
           <div class="col-md-4">
             <label for="medium_of_operation" class="form-label">Medium Of Operation</label>
-            <input type="text" class="form-control" id="medium_of_operation" name="medium_of_operation" value="{{ form_data.get('medium_of_operation', '') }}">
+            {% if select_options and select_options.get('medium_of_operation') %}
+              <select class="form-select" id="medium_of_operation" name="medium_of_operation">
+                <option value="">--</option>
+                {% for opt in select_options['medium_of_operation'] %}
+                  <option value="{{ opt }}" {% if form_data.get('medium_of_operation','')==opt %}selected{% endif %}>{{ opt }}</option>
+                {% endfor %}
+              </select>
+            {% else %}
+              <input type="text" class="form-control" id="medium_of_operation" name="medium_of_operation" value="{{ form_data.get('medium_of_operation', '') }}">
+            {% endif %}
           </div>
           <div class="col-md-4">
             <label for="internet_option" class="form-label">Internet Option</label>
-            <input type="text" class="form-control" id="internet_option" name="internet_option" value="{{ form_data.get('internet_option', '') }}">
+            {% if select_options and select_options.get('internet_option') %}
+              <select class="form-select" id="internet_option" name="internet_option">
+                <option value="">--</option>
+                {% for opt in select_options['internet_option'] %}
+                  <option value="{{ opt }}" {% if form_data.get('internet_option','')==opt %}selected{% endif %}>{{ opt }}</option>
+                {% endfor %}
+              </select>
+            {% else %}
+              <input type="text" class="form-control" id="internet_option" name="internet_option" value="{{ form_data.get('internet_option', '') }}">
+            {% endif %}
           </div>
           <div class="col-md-4">
             <label for="last_visit_time" class="form-label">Last Visit Time</label>
@@ -86,26 +149,71 @@
           </div>
           <div class="col-md-3">
             <label for="used_special_discount" class="form-label">Used Special Discount</label>
-            <input type="text" class="form-control" id="used_special_discount" name="used_special_discount" value="{{ form_data.get('used_special_discount', '') }}">
+            {% if select_options and select_options.get('used_special_discount') %}
+              <select class="form-select" id="used_special_discount" name="used_special_discount">
+                <option value="">--</option>
+                {% for opt in select_options['used_special_discount'] %}
+                  <option value="{{ opt }}" {% if form_data.get('used_special_discount','')==opt %}selected{% endif %}>{{ opt }}</option>
+                {% endfor %}
+              </select>
+            {% else %}
+              <input type="text" class="form-control" id="used_special_discount" name="used_special_discount" value="{{ form_data.get('used_special_discount', '') }}">
+            {% endif %}
           </div>
           <div class="col-md-3">
             <label for="offer_application_preference" class="form-label">Offer Application Preference</label>
-            <input type="text" class="form-control" id="offer_application_preference" name="offer_application_preference" value="{{ form_data.get('offer_application_preference', '') }}">
+            {% if select_options and select_options.get('offer_application_preference') %}
+              <select class="form-select" id="offer_application_preference" name="offer_application_preference">
+                <option value="">--</option>
+                {% for opt in select_options['offer_application_preference'] %}
+                  <option value="{{ opt }}" {% if form_data.get('offer_application_preference','')==opt %}selected{% endif %}>{{ opt }}</option>
+                {% endfor %}
+              </select>
+            {% else %}
+              <input type="text" class="form-control" id="offer_application_preference" name="offer_application_preference" value="{{ form_data.get('offer_application_preference', '') }}">
+            {% endif %}
           </div>
           <div class="col-md-3">
             <label for="past_complaint" class="form-label">Past Complaint</label>
-            <input type="text" class="form-control" id="past_complaint" name="past_complaint" value="{{ form_data.get('past_complaint', '') }}">
+            {% if select_options and select_options.get('past_complaint') %}
+              <select class="form-select" id="past_complaint" name="past_complaint">
+                <option value="">--</option>
+                {% for opt in select_options['past_complaint'] %}
+                  <option value="{{ opt }}" {% if form_data.get('past_complaint','')==opt %}selected{% endif %}>{{ opt }}</option>
+                {% endfor %}
+              </select>
+            {% else %}
+              <input type="text" class="form-control" id="past_complaint" name="past_complaint" value="{{ form_data.get('past_complaint', '') }}">
+            {% endif %}
           </div>
         </div>
 
         <div class="row g-3 mt-3">
           <div class="col-md-4">
             <label for="complaint_status" class="form-label">Complaint Status</label>
-            <input type="text" class="form-control" id="complaint_status" name="complaint_status" value="{{ form_data.get('complaint_status', '') }}">
+            {% if select_options and select_options.get('complaint_status') %}
+              <select class="form-select" id="complaint_status" name="complaint_status">
+                <option value="">--</option>
+                {% for opt in select_options['complaint_status'] %}
+                  <option value="{{ opt }}" {% if form_data.get('complaint_status','')==opt %}selected{% endif %}>{{ opt }}</option>
+                {% endfor %}
+              </select>
+            {% else %}
+              <input type="text" class="form-control" id="complaint_status" name="complaint_status" value="{{ form_data.get('complaint_status', '') }}">
+            {% endif %}
           </div>
           <div class="col-md-8">
             <label for="feedback" class="form-label">Feedback</label>
-            <input type="text" class="form-control" id="feedback" name="feedback" value="{{ form_data.get('feedback', '') }}">
+            {% if select_options and select_options.get('feedback') %}
+              <select class="form-select" id="feedback" name="feedback">
+                <option value="">--</option>
+                {% for opt in select_options['feedback'] %}
+                  <option value="{{ opt }}" {% if form_data.get('feedback','')==opt %}selected{% endif %}>{{ opt }}</option>
+                {% endfor %}
+              </select>
+            {% else %}
+              <input type="text" class="form-control" id="feedback" name="feedback" value="{{ form_data.get('feedback', '') }}">
+            {% endif %}
           </div>
         </div>
 

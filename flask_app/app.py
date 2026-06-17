@@ -94,6 +94,13 @@ def load_model_and_vectorizer():
     model_name = os.getenv("MLFLOW_MODEL_NAME", "churn-risk-model")
     model = None
 
+    # If a full inference pipeline was saved during training, prefer that.
+    pipeline_path = ROOT_DIR / "models" / "pipeline.pkl"
+    if pipeline_path.exists():
+        app.logger.info("Loading full inference pipeline from %s", pipeline_path)
+        pipeline = joblib.load(pipeline_path)
+        return pipeline, None
+
     try:
         model_version = get_latest_model_version(model_name)
         if model_version:
@@ -117,7 +124,12 @@ def load_model_and_vectorizer():
 
 def build_input_dataframe(form_data):
     raw_values = {field: form_data.get(field, "") for field in RAW_FEATURES}
-    return pd.DataFrame([raw_values])
+    df = pd.DataFrame([raw_values])
+    # Some saved transformers expect an index column named 'Unnamed: 0' (CSV index).
+    # Add a default value so transforms don't fail when that column is expected.
+    if "Unnamed: 0" not in df.columns:
+        df["Unnamed: 0"] = 0
+    return df
 
 
 def build_prediction_features(raw_df):
@@ -134,7 +146,28 @@ model, vectorizer = load_model_and_vectorizer()
 def home():
     REQUEST_COUNT.labels(method="GET", endpoint="/").inc()
     start_time = time.time()
-    response = render_template("index.html", result=None, probability=None, form_data={})
+    # Attempt to build select options for categorical fields from a sample dataset.
+    select_options = {}
+    try:
+        sample_path = ROOT_DIR / "src" / "dataset.csv"
+        if sample_path.exists():
+            sample_df = pd.read_csv(sample_path)
+            for col in RAW_FEATURES:
+                if col in sample_df.columns:
+                    uniques = sample_df[col].dropna().unique().tolist()
+                    # Only offer a dropdown for columns with a reasonable number of categories
+                    if 1 < len(uniques) <= 200:
+                        select_options[col] = sorted(map(str, uniques))
+    except Exception:
+        select_options = {}
+
+    response = render_template(
+        "index.html",
+        result=None,
+        probability=None,
+        form_data={},
+        select_options=select_options,
+    )
     REQUEST_LATENCY.labels(endpoint="/").observe(time.time() - start_time)
     return response
 
@@ -146,12 +179,43 @@ def predict():
 
     raw_df = build_input_dataframe(request.form)
     feature_df = build_prediction_features(raw_df)
-    features = vectorizer.transform(feature_df)
-
-    prediction = model.predict(features)[0]
+    # If `vectorizer` is None, we assume `model` is a full pipeline that
+    # accepts raw inputs (or will handle preprocessing internally).
     probability = None
-    if hasattr(model, "predict_proba"):
-        probability = float(model.predict_proba(features)[0][1])
+    try:
+        if vectorizer is None:
+            # Try passing raw inputs first (pipeline may expect raw DataFrame).
+            preds = model.predict(raw_df)
+            # try predict_proba on raw inputs as well
+            if hasattr(model, "predict_proba"):
+                proba = model.predict_proba(raw_df)
+                probability = float(proba[0][1]) if proba is not None and len(proba) > 0 else None
+        else:
+            features = vectorizer.transform(feature_df)
+            preds = model.predict(features)
+            if hasattr(model, "predict_proba"):
+                proba = model.predict_proba(features)
+                probability = float(proba[0][1]) if proba is not None and len(proba) > 0 else None
+
+        # unify prediction extraction
+        prediction = preds[0] if hasattr(preds, "__len__") else preds
+    except Exception:
+        # fallback: if pipeline expects preprocessed features
+        if vectorizer is None:
+            features = feature_df
+            if hasattr(model, "transform"):
+                try:
+                    features = model.transform(feature_df)
+                except Exception:
+                    pass
+        else:
+            features = vectorizer.transform(feature_df)
+
+        preds = model.predict(features)
+        prediction = preds[0] if hasattr(preds, "__len__") else preds
+        if hasattr(model, "predict_proba"):
+            proba = model.predict_proba(features)
+            probability = float(proba[0][1]) if proba is not None and len(proba) > 0 else None
 
     PREDICTION_COUNT.labels(prediction=str(prediction)).inc()
     REQUEST_LATENCY.labels(endpoint="/predict").observe(time.time() - start_time)
@@ -162,6 +226,14 @@ def predict():
         result=result_text,
         probability=probability,
         form_data=request.form,
+        select_options=(lambda: (
+            (lambda s: s)(
+                (lambda: (lambda p: ({
+                    col: sorted(map(str, pd.read_csv(p)[col].dropna().unique().tolist()))
+                    for col in RAW_FEATURES if col in pd.read_csv(p).columns and 1 < len(pd.read_csv(p)[col].dropna().unique().tolist()) <= 200
+                } if p.exists() else {}))(ROOT_DIR / "src" / "dataset.csv")
+            ))()
+        ))(),
     )
 
 
