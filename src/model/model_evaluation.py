@@ -112,10 +112,13 @@ if __name__ == "__main__":
     #     dagshub_repo_name = dagshub_repo_name or os.getenv("DAGSHUB_REPO_NAME")
 
     # Auth setup
+    dagshub_repo_owner = dagshub_repo_owner or os.getenv("DAGSHUB_REPO_OWNER")
+    dagshub_repo_name = dagshub_repo_name or os.getenv("DAGSHUB_REPO_NAME")
     dagshub_token = os.getenv("DAGSHUB_USER_TOKEN")
 
     if not dagshub_token:
             raise EnvironmentError("DAGSHUB_USER_TOKEN environment variable is not set")
+    
     os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
 
     os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
