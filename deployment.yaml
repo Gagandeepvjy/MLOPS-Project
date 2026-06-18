@@ -18,7 +18,7 @@ spec:
       - name: flask-app
         image: 930069301492.dkr.ecr.eu-north-1.amazonaws.com/mlops-project:latest
         ports:
-        - containerPort: 5000
+        - containerPort: 5002
         resources:
           requests:
             memory: "256Mi"
@@ -45,5 +45,5 @@ spec:
   ports:
     - name: http
       protocol: TCP
-      port: 5000
-      targetPort: 5000
+      port: 5002
+      targetPort: 5002

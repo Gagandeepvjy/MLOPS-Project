@@ -1,56 +1,73 @@
-MLOPS-PROJECT
-==============================
+MLOPS Project
+==============
 
-A short description of the project.
+A Dockerized Flask + MLflow churn prediction application built as an MLOps demo.
 
-Project Organization
-------------
+## What this project contains
 
-    ├── LICENSE
-    ├── Makefile           <- Makefile with commands like `make data` or `make train`
-    ├── README.md          <- The top-level README for developers using this project.
-    ├── data
-    │   ├── external       <- Data from third party sources.
-    │   ├── interim        <- Intermediate data that has been transformed.
-    │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- The original, immutable data dump.
-    │
-    ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
-    │
-    ├── models             <- Trained and serialized models, model predictions, or model summaries
-    │
-    ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-    │                         the creator's initials, and a short `-` delimited description, e.g.
-    │                         `1.0-jqp-initial-data-exploration`.
-    │
-    ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-    │
-    ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-    │   └── figures        <- Generated graphics and figures to be used in reporting
-    │
-    ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-    │                         generated with `pip freeze > requirements.txt`
-    │
-    ├── setup.py           <- makes project pip installable (pip install -e .) so src can be imported
-    ├── src                <- Source code for use in this project.
-    │   ├── __init__.py    <- Makes src a Python module
-    │   │
-    │   ├── data           <- Scripts to download or generate data
-    │   │   └── make_dataset.py
-    │   │
-    │   ├── features       <- Scripts to turn raw data into features for modeling
-    │   │   └── build_features.py
-    │   │
-    │   ├── models         <- Scripts to train models and then use trained models to make
-    │   │   │                 predictions
-    │   │   ├── predict_model.py
-    │   │   └── train_model.py
-    │   │
-    │   └── visualization  <- Scripts to create exploratory and results oriented visualizations
-    │       └── visualize.py
-    │
-    └── tox.ini            <- tox file with settings for running tox; see tox.readthedocs.io
+- `flask_app/` — Flask application and Jinja2 UI templates for serving predictions
+- `models/` — serialized model artifacts used at inference time
+- `src/` — core project logic for data ingestion, preprocessing, feature engineering, model training, evaluation, and MLflow model registration
+- `data/` — raw, interim, and processed data assets
+- `mlruns/` — local MLflow experiment metadata and model artifacts
+- `Dockerfile` — builds a container image for the Flask app
+- `requirements.txt` — Python dependencies for the full project
+- `flask_app/requirements.txt` — runtime requirements for the Flask service
 
+## Quick start
 
---------
+### Install dependencies
 
+```bash
+python -m pip install -r requirements.txt
+```
+
+### Run locally
+
+```bash
+python flask_app/app.py
+```
+
+Open `http://localhost:5002` in your browser.
+
+### Run with Docker
+
+```bash
+docker build -t mlops:latest .
+docker run -p 8888:5002 mlops:latest
+```
+
+Open `http://localhost:8888` in your browser.
+
+## How the Flask app works
+
+- The Flask app is defined in `flask_app/app.py`.
+- The model is loaded from MLflow registry if configured; otherwise it falls back to `models/model.pkl`.
+- The feature preprocessing vectorizer is loaded from `models/vectorizer.pkl`.
+- Dropdown option values on the UI are built from `src/dataset.csv`.
+
+## Docker behavior
+
+The Docker image copies:
+
+- the root `requirements.txt` and `setup.py` for dependency installation
+- `flask_app/` source files
+- `models/` serialized artifacts
+- `src/dataset.csv` so UI dropdowns are populated at runtime
+
+The container starts the Flask app with `gunicorn` on port `5002`.
+
+## Useful commands
+
+```bash
+git status
+python flask_app/app.py
+docker build --no-cache -t mlops:latest .
+docker run -p 8888:5002 mlops:latest
+```
+
+## Notes
+
+- `mlflow.txt` is ignored by git once it is removed from tracking with `git rm --cached mlflow.txt`.
+- If the UI still appears stale after a change, rebuild the Docker image with `--no-cache`.
+- The app logs metrics and can expose Prometheus metrics at `/metrics`.
